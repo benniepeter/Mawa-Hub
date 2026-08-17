@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { authHttpRouter } from './auth/http-routes.js';
 import { paymentWebhook } from './payments/http-webhook.js';
+import { paymentInitiateHttp } from './payments/http-initiate.js';
 
 const port=Number(process.env.PORT||8080);
 const allowedOrigin=process.env.WEB_ORIGIN||'http://localhost:3000';
@@ -12,6 +13,7 @@ const server=createServer(async(req,res)=>{
   if(req.method==='OPTIONS'){res.statusCode=204;res.end();return;}
   try {
     if(await paymentWebhook(req,res))return;
+    if(await paymentInitiateHttp(req,res))return;
     if(await authHttpRouter(req,res))return;
     res.statusCode=404;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({error:'not_found'}));
   } catch(error) {
