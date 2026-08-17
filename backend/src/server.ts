@@ -19,10 +19,16 @@ const server=createServer(async(req,res)=>{
     if(await receiptHttp(req,res))return;
     if(await transactionHttp(req,res))return;
     if(await authHttpRouter(req,res))return;
-    res.statusCode=404;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({error:'not_found'}));
+    res.statusCode=404;
+    res.setHeader('Content-Type','application/json');
+    res.end(JSON.stringify({error:'not_found'}));
   } catch(error) {
     console.error('request_error',error instanceof Error?error.message:'unknown');
-    if(!res.headersSent){res.statusCode=500;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({error:'internal_server_error'});}
+    if(!res.headersSent){
+      res.statusCode=500;
+      res.setHeader('Content-Type','application/json');
+      res.end(JSON.stringify({error:'internal_server_error'}));
+    }
   }
 });
 server.listen(port,()=>console.log(`MawaHub API listening on ${port}`));
