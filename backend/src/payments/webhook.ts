@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { transitionPayment } from '../services/payments.js';
+import { reconcilePaidPayment } from './reconcile.js';
 
 export type VerifiedWebhook={paymentId:string;status:'processing'|'paid'|'failed'|'cancelled';providerReference?:string};
 
@@ -11,5 +12,6 @@ export function verifySignature(rawBody:string,signature:string,secret:string){
 }
 
 export async function handleVerifiedWebhook(event:VerifiedWebhook){
+  if(event.status==='paid')return reconcilePaidPayment(event.paymentId,event.providerReference);
   return transitionPayment(event.paymentId,event.status,event.providerReference);
 }
