@@ -1,0 +1,6 @@
+const KEY='mawahub_language';
+export const LANGUAGES={en:'English',sw:'Kiswahili',fr:'Français',pt:'Português',ar:'العربية'};
+let messages={};
+export async function loadLanguage(lang){const code=LANGUAGES[lang]?lang:'en';const r=await fetch(`/content/i18n/${code}.json`);if(!r.ok)throw new Error(`language_load_failed:${code}`);messages=await r.json();document.documentElement.lang=code;localStorage.setItem(KEY,code);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(k&&messages[k]!=null)el.textContent=messages[k]});document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.dataset.i18nPlaceholder;if(k&&messages[k]!=null)el.placeholder=messages[k]});window.dispatchEvent(new CustomEvent('mawahub:language-changed',{detail:{lang:code}}));return code}
+export function t(key,fallback=key){return messages[key]??fallback}
+export function initLanguageSelector(selector='[data-language-selector]'){const el=document.querySelector(selector);if(!el)return;el.innerHTML=Object.entries(LANGUAGES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');const saved=localStorage.getItem(KEY)||navigator.language?.slice(0,2)||'en';el.value=LANGUAGES[saved]?saved:'en';el.addEventListener('change',()=>loadLanguage(el.value).catch(console.error));return loadLanguage(el.value).catch(()=>loadLanguage('en'))}
