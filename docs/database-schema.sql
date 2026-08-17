@@ -108,12 +108,22 @@ CREATE TABLE audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Persistent authentication sessions. Store only a SHA-256 hash of the opaque browser token.
+CREATE TABLE sessions (
+  id_hash CHAR(64) PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX idx_products_seller ON products(seller_id);
 CREATE INDEX idx_products_category ON products(category);
 CREATE INDEX idx_orders_buyer ON orders(buyer_id);
 CREATE INDEX idx_payments_reference ON payments(provider, provider_reference);
 CREATE INDEX idx_donations_donor ON donations(donor_id);
 CREATE INDEX idx_audit_actor ON audit_logs(actor_user_id);
+CREATE INDEX idx_sessions_user ON sessions(user_id);
+CREATE INDEX idx_sessions_expiry ON sessions(expires_at);
 
 -- Production requirements:
 -- 1. Use migrations and least-privilege DB roles.
